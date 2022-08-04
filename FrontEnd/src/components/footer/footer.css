@@ -1,0 +1,18 @@
+/* Import variables */
+@import "../../assets/css/variables.css";
+@import "../../assets/css/utility.css";
+
+.socials {
+    font-size: 3rem;
+    width: 20%;
+}
+
+@media only screen and (max-width: 930px) {
+    .socials {
+        width: 40%;
+    }
+}
+
+.social-link {
+    transition: var(--standard-transition);
+}
