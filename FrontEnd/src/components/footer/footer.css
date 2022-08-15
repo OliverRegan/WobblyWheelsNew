@@ -16,3 +16,10 @@
 .social-link {
     transition: var(--standard-transition);
 }
+
+footer {
+    position: relative;
+    bottom: 0;
+    height: 6rem;
+    margin-top: 6rem;
+}

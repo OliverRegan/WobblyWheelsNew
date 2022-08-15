@@ -1,6 +1,7 @@
 // React & React components
 import React, { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 
 // Components
 import TopNav from "../topNav/TopNav"
@@ -23,7 +24,6 @@ const Layout = props => {
     // Menu state
     const [menu, setMenu] = useState()
 
-
     useEffect(() => {
         if (width > 930) {
             setMenu(true);
@@ -33,9 +33,17 @@ const Layout = props => {
     }, [])
 
     return (
-        <div className='bg-dark'>
-            <TopNav setMenu={setMenu} menu={menu}/>
-            <Outlet />
+        <div className='bg-dark h-100'>
+            <Helmet>
+                <title>Wobbly Wheels Skate Lessons</title>
+                <meta name='description' content="Rolelr skate lessons around Brisbane." />
+                <html className='h-100 bg-dark' />
+                <body className='h-100 d-flex flex-column bg-dark' />
+            </Helmet>
+            <TopNav setMenu={setMenu} menu={menu} loggedIn={props.loggedIn} />
+            <div className=' bg-dark d-flex flex-column w-100 justify-content-center mb-0' id='outlet'>
+                <Outlet />
+            </div>
             <Footer />
         </div>
     )

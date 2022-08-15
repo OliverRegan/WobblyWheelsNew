@@ -15,9 +15,7 @@
 
 
 /* Lessons */
-.lesson-card-shell {
-    padding: 0rem !important;
-}
+
 
 /* Nav stuff */
 #mobile-brand {
@@ -79,16 +77,7 @@
 }
 
 /* Meet the team */
-#meet-the-team-container {
-    display: flex;
-    flex-direction: column;
-}
 
-.meet-card-img {}
-
-.coach-card-custom {
-    width: 100%;
-}
 
 
 /* Lessons */

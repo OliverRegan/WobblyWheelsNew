@@ -21,6 +21,7 @@
 
 html {
     scroll-behavior: smooth;
+    min-height: 100vh;
 }
 
 /* Utility */
@@ -106,6 +107,12 @@ html {
 .whole-screen-spacer {
     height: 90vh;
     width: 100%;
+}
+
+.hr-tertiary {
+    height: 2px;
+    background-color: var(--main-primary);
+    color: var(--main-second);
 }
 
 .section-spacer {
@@ -387,4 +394,33 @@ img {
     background-color: var(--primary-hover);
     color: var(--main-light);
     border: none;
+}
+
+.img-mobile {
+    display: none;
+}
+
+.img-desktop {
+    display: block;
+}
+
+
+/* Compensate for small height components */
+.big-height {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+@media only screen and (max-width: 1000px) {
+
+    .img-mobile {
+        display: block;
+    }
+
+    .img-desktop {
+        display: none;
+    }
 }

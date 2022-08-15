@@ -102,11 +102,7 @@
 }
 
 /* ==================== Horizontal rules ====================*/
-.hr-tertiary {
-    height: 2px;
-    background-color: var(--main-primary);
-    color: var(--main-second);
-}
+
 
 
 .social-link {
@@ -147,14 +143,9 @@
 }
 
 /* Meet the team */
-#meet-the-team-container {
-    display: flex;
-    flex-direction: row;
-}
 
-.coach-card-custom {
-    width: 30%;
-}
+
+
 
 /* Lessons */
 /* middle cards */

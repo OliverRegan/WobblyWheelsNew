@@ -11,7 +11,8 @@ import "./footer.css"
 
 const Footer = () => {
     return (
-        <footer className="bg-main w-100 mt-auto" id="footer">
+        <footer className="bg-main w-100" id="footer">
+
             <div className="container text-center">
                 <h4 className="pt-2 text-light text-shadow-orange">&copy; Wobbly Wheels 2021</h4>
                 <div className="d-flex justify-content-between mx-auto socials">
