@@ -1,5 +1,6 @@
 // React components
 import { useEffect, useState } from "react"
+import { useGetCoaches } from "../../../assets/dataFunctions/useGetCoaches"
 
 // Css
 import "./coaches.css"
@@ -7,31 +8,9 @@ import "./coaches.css"
 const Coaches = props => {
 
     // Fetch coach info from back end
-    const [coaches, setCoaches] = useState([])
+    let { coaches, loading, error } = useGetCoaches();
 
 
-
-    useEffect(() => {
-
-        let headers = new Headers();
-        headers.append('Accept', 'application/json')
-        headers.append('Content-Type', 'application/json')
-
-        fetch("http://localhost:3001/coaches", {
-            method: 'GET',
-            headers: headers
-        })
-            .then((res) => {
-                res.json().then((data) => ({
-                    data: data,
-                    status: res.status
-                })).then(response => {
-                    setCoaches(response.data)
-                })
-            })
-    }, [])
-
-    console.log(coaches);
 
     return (
         <div>
@@ -43,7 +22,9 @@ const Coaches = props => {
             </div>
             <div id="meet-the-team-container" className="w-85 justify-content-between mx-auto">
 
-                {
+                {loading || error ?
+                    <div>{loading ? "Loading..." : "Something went wrong"}</div>
+                    :
                     coaches.map((coach) => {
                         return (
                             <div className="bg-light shadow d-flex mt-4 rounded coach-card-custom" key={coach.coachId}>

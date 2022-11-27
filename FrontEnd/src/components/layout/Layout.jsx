@@ -29,6 +29,7 @@ const Layout = props => {
             setMenu(true);
         } else if (width < 930) {
             setMenu(false);
+
         }
     }, [])
 
@@ -40,7 +41,7 @@ const Layout = props => {
                 <html className='h-100 bg-dark' />
                 <body className='h-100 d-flex flex-column bg-dark' />
             </Helmet>
-            <TopNav setMenu={setMenu} menu={menu} loggedIn={props.loggedIn} />
+            <TopNav setMenu={setMenu} menu={menu} loggedIn={props.loggedIn} setLoginType={props.setLoginType} />
             <div className=' bg-dark d-flex flex-column w-100 justify-content-center mb-0' id='outlet'>
                 <Outlet />
             </div>

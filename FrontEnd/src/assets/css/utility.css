@@ -390,7 +390,48 @@ img {
 
 }
 
-.custom-btn:hover {
+.custom-btn-no-colour {
+
+    min-width: 10rem;
+    border: none;
+
+}
+
+.custom-btn:disabled {
+    background-color: var(--main-dark);
+    color: var(--main-light);
+    min-width: 10rem;
+    border: none;
+
+}
+
+.custom-btn-any-width {
+    background-color: var(--main-secondary);
+    color: var(--main-light);
+    border: none;
+
+}
+
+.custom-btn:visited,
+.custom-btn-any-width:visited {
+    background-color: var(--main-secondary);
+    color: var(--main-light);
+    min-width: 10rem;
+    border: none;
+
+}
+
+.custom-btn:focus,
+.custom-btn-any-width:focus {
+    background-color: var(--main-secondary);
+    color: var(--main-light);
+    min-width: 10rem;
+    border: none;
+
+}
+
+.custom-btn:hover,
+.custom-btn-any-width:hover {
     background-color: var(--primary-hover);
     color: var(--main-light);
     border: none;

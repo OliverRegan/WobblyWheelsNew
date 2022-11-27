@@ -5,7 +5,7 @@ var router = express.Router();
 router.get('/', function (req, res, next) {
 
     // Query database
-    const queryUpdates = req.db.from('updates').select()
+    const queryUpdates = req.db.from('updates').select('*')
     const updates = []
 
     // Throw error if there is a query in the URL

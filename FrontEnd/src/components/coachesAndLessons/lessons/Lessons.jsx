@@ -1,35 +1,15 @@
 // React components
 import { useEffect, useState } from "react"
-
+import { Link } from "react-router-dom"
+import { useGetLessons } from "../../../assets/dataFunctions/useGetLessons"
 // Css
 import "./lessons.css"
 
 const Lessons = props => {
 
     // Fetch lessons info from back end
-    const [lessons, setlessons] = useState([])
+    let { lessons, loading } = useGetLessons();
 
-
-
-    useEffect(() => {
-
-        let headers = new Headers();
-        headers.append('Accept', 'application/json')
-        headers.append('Content-Type', 'application/json')
-
-        fetch("http://localhost:3001/lessons", {
-            method: 'GET',
-            headers: headers
-        })
-            .then((res) => {
-                res.json().then((data) => ({
-                    data: data,
-                    status: res.status
-                })).then(response => {
-                    setlessons(response.data)
-                })
-            })
-    }, [])
 
 
     return (
@@ -38,7 +18,9 @@ const Lessons = props => {
                 <p className="card-title-custom text-center"><span className="font-italic">Lessons
                 </span></p>
             </div>
-            {
+            {loading === true ?
+                <div className="col-lg-3 lesson-card-shell my-3">Loading...</div>
+                :
                 lessons.map((lesson) => {
                     return (
                         <div className="col-lg-3 lesson-card-shell my-3" key={lesson.lessonId}>
@@ -49,7 +31,7 @@ const Lessons = props => {
                                     <h5 className="card-title lesson-card-title ">{lesson.lessonName}</h5>
                                     <h5 className="card-title lesson-card-price">${lesson.lessonPrice}</h5>
                                     <hr className="hr-tertiary w-80 mx-auto" />
-                                    <a className="btn custom-btn" href={'/lessons/' + lesson.lessonId}>Book Now!</a>
+                                    <Link className="btn custom-btn" to={'/booking/' + lesson.lessonId}>Book Now!</Link>
 
                                 </div>
                             </div>

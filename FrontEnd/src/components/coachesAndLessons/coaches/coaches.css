@@ -17,12 +17,12 @@
 }
 
 .intro-text {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     padding: 0 1rem;
     margin: 2rem 0;
 }
 
-@media only screen and (max-width: 930px) {
+@media only screen and (max-width: 960px) {
     #meet-the-team-container {
         display: flex;
         flex-direction: column;

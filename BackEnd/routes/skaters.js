@@ -6,22 +6,26 @@ router.get('/', function (req, res, next) {
 
 
     // Query database
-    const queryLessons = req.db.from('lessons').select('*')
-    const lessons = []
+    const querySkaters = req.db('skaters').join('users', 'skaterAssociatedUserId', '=', 'userId').select('skaterId', 'skaterName', 'skaterLastName', 'skaterEmergencyContact', 'userName')
+    const skaterArr = []
 
     // Throw error if there is a query in the URL
     if (Object.keys(req.query).length !== 0) {
         return res.status(400).json({ "error": true, "message": "Invalid query parameters. Query parameters are not permitted." })
     }
 
+
+
     // Put names into array
-    queryLessons.then((lesson) => {
+    querySkaters.then((skaters) => {
         // Map into array
-        lesson.map((lessonObj) => {
-            lessons.push(lessonObj)
+        skaters.map((skatersObj) => {
+            skaterArr.push(skatersObj)
         })
+
     }).then(() => {
-        return res.status(200).json(lessons)
+
+        return res.status(200).json(skaterArr);
     })
 });
 
@@ -32,7 +36,7 @@ router.get('/:id', function (req, res, next) {
     const id = req.params.id;
 
     // Query database
-    const queryLessons = req.db.from('lessons').select('*').where("lessonId", '=', id)
+    const querySkaters = req.db.from('skaters').select('*').where("skaterId", '=', id)
 
     // Throw error if there is a query in the URL
     if (Object.keys(req.query).length !== 0) {
@@ -40,8 +44,8 @@ router.get('/:id', function (req, res, next) {
     }
 
     // Put names into array
-    queryLessons.then((lesson) => {
-        return res.status(200).json(lesson)
+    querySkaters.then((skater) => {
+        return res.status(200).json(skater)
     })
 
 

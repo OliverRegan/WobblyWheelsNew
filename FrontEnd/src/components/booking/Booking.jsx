@@ -1,55 +1,87 @@
 // React components
 import { useEffect, useState, useRef } from 'react'
 import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router'
+import { useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router'
+import { Link } from 'react-router-dom';
 
 // Image
 import lessonImg from "../../assets/img/lessons/Beginner-Court-Lesson.jpg"
 
 const Booking = props => {
 
+    // Get token
+    const token = useSelector((state) => state.loggedIn.token);
+
+
     let headers = new Headers();
     headers.append('Accept', 'application/json')
     headers.append('Content-Type', 'application/json')
+    headers.append('Authorization', token)
 
     const { id } = useParams();
 
+    // Get user
+    const user = useSelector((state) => state.loggedIn.user);
+
+
     // form data
     const [data, setData] = useState();
-    const bookingNum = useRef();
     const bookingDay = useRef();
     const bookingDate = useRef();
     const bookingTime = useRef();
     const bookingSkaters = useRef();
 
+    // Booking data
+    const [numBookings, setNumBookings] = useState();
 
     // lesson data
     const [lessonLoading, setLessonLoading] = useState(true)
     const [lesson, setLesson] = useState([])
+
     // user data
     const [userLoading, setUserLoading] = useState(true)
-    const [user, setUser] = useState([])
     const [userSkaters, setUserSkaters] = useState()
-    const [selectedSkaters, setSelectedSkaters] = useState([])
+    const [selectedSkaterNames, setSelectedSkaterNames] = useState([])
 
+    // Errors
+    const [error, setError] = useState([false, ''])
+
+    const selector = useSelector;
+    const navigate = useNavigate();
+
+    // Check if user is logged in, otherwise reroute to login
+    const loggedIn = selector((state) => state.loggedIn.value);
+
+    function checkLogin() {
+        if (!loggedIn) {
+            navigate('/login');
+        }
+    }
     // Fetch ID data for user
     useEffect(() => {
+        checkLogin()
+        // Get lesson data
         function getData() {
-            fetch(("http://localhost:3001/lessons/" + id), {
+            fetch(("http://127.0.0.1:3001/lessons/" + id), {
                 method: 'GET',
                 headers: headers
             })
                 .then((res) => {
                     res.json().then((data) => ({
-                        data: data,
+                        data: data[0],
                         status: res.status
                     })).then(response => {
                         setLesson(response.data)
                     }).finally(() => {
                         setLessonLoading(false)
+                    }).catch((error) => {
+                        console.log(error);
                     })
                 })
-            fetch(("http://localhost:3001/users/" + props.loggedIn), {
+
+            // Get skaters
+            fetch("http://localhost:3001/users/getSkaters", {
                 method: 'GET',
                 headers: headers
             })
@@ -58,72 +90,135 @@ const Booking = props => {
                         data: data,
                         status: res.status
                     })).then(response => {
-                        setUser(response.data[0])
+                        setUserSkaters(response.data)
                     }).finally(() => {
                         setUserLoading(false)
-
+                    }).catch((error) => {
+                        console.log(error)
                     })
                 })
+
         }
 
         getData();
 
     }, [])
 
-    if (!userLoading && userSkaters == undefined) {
-        setUserSkaters(user.userSkaters)
-    }
+
 
     const removeSkaters = (event) => {
         event.preventDefault();
-        setSelectedSkaters([]);
+        setSelectedSkaterNames([]);
         bookingSkaters.current.value = 'Select Skater...';
+
+        // also remove errors
+        setError([false, ''])
     }
 
     // on Submit
     const handleSubmit = async (event) => {
 
         event.preventDefault();
-        console.log(bookingDate.current.value)
-        // Test picked date
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',]
 
-        let date = new Date(bookingDate.current.value)
-
-        // Prevent booking if wrong day input
-        if (days[date.getDay()] != bookingDay.current.value) {
-            return alert("Must pick a date that is the same Day as your chosen lesson")
+        // Check for errors before submitting
+        // Check there are skaters
+        if (selectedSkaterNames.length === 0) {
+            setError([true, 'You must select skaters before booking']);
+            return;
         }
-
+        // Check that date and time have been selected
+        if (bookingDate.current.value == undefined || bookingTime.current.value == undefined || bookingDate.current.value == 'Select a date...' || bookingTime.current.value == 'Select a time...') {
+            setError([true, 'You must select a date and time to book a lesson'])
+            return
+        }
+        // Check that the lesson isn't full
+        if ((lesson.lessonCapacity - numBookings) < selectedSkaterNames.length) {
+            setError([true, "There aren't enough spaces in the lesson for all of the skaters you have selected"])
+            return
+        }
+        // 
 
         // Get form data for submission
-        const bookingNum = selectedSkaters.length;
-
         let body = {
-            "skaters": JSON.stringify(selectedSkaters),
-            "number": bookingNum,
-            "user": props.loggedIn,
+            "skaters": JSON.stringify(selectedSkaterNames),
+            "user": user,
             "time": bookingTime.current.value,
-            "day": bookingDay.current.value,
             "date": bookingDate.current.value
         }
 
-        fetch("http://localhost:3001/booking", {
+        fetch("http://127.0.0.1:3001/booking/" + id, {
             method: 'POST',
-            headers: headers
+            headers: headers,
+            body: JSON.stringify(body)
         })
             .then((res) => {
-                res.json().then((data) => ({
-                    data: data,
-                    status: res.status
-                })).then(response => {
-                    setData(response.data)
-                }).catch(
-                    // Catch error response from back end
+                res.json().then((data) => {
+                    if (res.status === 406) {
+                        console.log(data.message)
+                        setError([true, data.message])
+                        console.log(error)
+                    } else {
+                        console.log(data)
+                        // Send message to user
+                        setError([false, data.message])
 
-                )
+                    }
+                })
             })
     }
+
+    function handleSkaterSelect(e) {
+        let tmp = [];
+        selectedSkaterNames.forEach((skater) => {
+            tmp.push(skater);
+        })
+        if (!selectedSkaterNames.includes(e.target.value) && e.target.value != "Select Skater...") {
+            tmp.push(e.target.value)
+            setSelectedSkaterNames(tmp)
+        }
+    }
+
+    // Handle select of date and time
+    function handleSelect(e) {
+        console.log(e.target.value)
+        if (bookingDate.current.value != undefined && bookingTime.current.value != undefined && bookingDate.current.value != 'Select a date...' && bookingTime.current.value != 'Select a time...') {
+            // Then a valid selection and get booking numbers for that day
+            getNumBookings();
+            if ((lesson.lessonCapacity - numBookings) < selectedSkaterNames.length) {
+                setError([true, "There aren't enough spaces in the lesson for all of the skaters you have selected"])
+            }
+        } else {
+            setNumBookings();
+        }
+    }
+
+    function getNumBookings() {
+        // Get booking numbers for specific lesson
+        fetch("http://localhost:3001/booking/numbers/" + id, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                date: bookingDate.current.value,
+                time: bookingTime.current.value
+            })
+        }).then((res) => {
+            res.json().then((data) => {
+                setNumBookings(lesson.lessonCapacity - data.bookings)
+            })
+        })
+    }
+
+    // Get days of lesson for 3 weeks
+    function getDays(dayVal) {
+        const d = new Date();
+        d.setDate(d.getDate() + ((7 - d.getDay()) % 7 + dayVal) % 7)
+        let days = [d, new Date(new Date().setDate(d.getDate() + 7)), new Date(new Date().setDate(d.getDate() + 14))]
+        days.map(day => {
+            return day.setHours(0, 0, 0, 0);
+        })
+        return days
+    }
+
 
     return (
         <div className="my-4 big-height">
@@ -139,60 +234,82 @@ const Booking = props => {
                     <hr className="hr-tertiary w-80 mx-auto" />
                     <ul className="list-group list-group-flush w-60 mx-auto">
                         <li className="row">
-                            <div className="col-md-4">
-                                <img src={lessonImg} alt="" className="img-fluid rounded" />
-                            </div>
-                            <div className="col-md-8">
+
+                            <div className="">
                                 {lessonLoading ?
                                     (<div className='display-1'>Loading</div>)
                                     :
                                     (<form onSubmit={(event) => handleSubmit(event)} className="row h-100 justify-content-center">
-                                        <h1 className="col-12 h3">{lesson[0].lessonName}</h1>
-                                        <div className="col-5 my-3">${lesson[0].lessonPrice}</div>
-                                        <div className="col-5 my-3">Spaces remaining: {lesson[0].lessonCapacity - lesson[0].lessonBookedNum + "/" + lesson[0].lessonCapacity}</div>
+                                        <h1 className="col-12 h3">{lesson.lessonName}</h1>
+                                        <div className='col-10'>{lesson.lessonDescription}</div>
+                                        {/* Error space */}
+                                        {error[1] === '' ? '' : <div className='col-10 mx-auto mt-3'>
+                                            <p className={error[0] ? "text-danger" : 'text-success'}>{error[1]}</p>
+                                        </div>}
+                                        <div className="col-10 my-3 h3 text-main">Price:<br /> ${lesson.lessonPrice}</div>
+                                        {numBookings === undefined ? <div className="col-10 my-3 text-main">Please select a date and time to see available bookings</div> : <div className="col-10 my-3 h3 text-main">Spaces remaining:<br />{numBookings + "/" + lesson.lessonCapacity}</div>}
+
+
                                         <div className="col-5 my-3">
-                                            <select className='form-control' name="day" ref={bookingDay}>
-                                                <option value={lesson[0].lessonDay}>{lesson[0].lessonDay}</option>
+                                            <label htmlFor="time">Choose a Time:</label>
+                                            <select className='form-control' name="time" ref={bookingTime} onChange={(e) => handleSelect(e)}>
+                                                <option>Select a time...</option>
+                                                <option value={lesson.lessonTime} className="text-center">{lesson.lessonTime}</option>
                                             </select>
                                         </div>
                                         <div className="col-5 my-3">
-                                            <select className='form-control' name="time" ref={bookingTime}>
-                                                <option value={lesson[0].lessonTime}>{lesson[0].lessonTime}</option>
+                                            {/* Change to a react date picker */}
+                                            {/* <input type="date" className='form-control' name="bookingDate" ref={bookingDate} /> */}
+                                            <label htmlFor="date">Choose a Date:</label>
+                                            <select className='form-control' name="date" ref={bookingDate} onChange={(e) => handleSelect(e)}>
+                                                <option>Select a date...</option>
+                                                {getDays(lesson.lessonDay - 1).map(option => {
+                                                    return <option value={option}>{option.toDateString()}</option>
+                                                })}
                                             </select>
                                         </div>
                                         <div className="col-10 text-start">
-                                            <p><span className='lead'>Current Skaters: </span><span>{JSON.stringify(selectedSkaters) === JSON.stringify([]) ? "No skaters selected yet..." : selectedSkaters.map((skater) => {
-                                                return <span key={userSkaters.indexOf(skater)}>{skater + " "}</span>
-                                            })}</span></p>
-                                            {JSON.stringify(selectedSkaters) === JSON.stringify([]) ? "" : <a href="#" onClick={(event) => {
+                                            <p><h3 className='lead text-center'>Selected Skaters</h3><ul className='list-group'>{JSON.stringify(selectedSkaterNames) === JSON.stringify([]) ? <li className='list-group-item text-center text-danger'>No skaters selected yet...</li> : selectedSkaterNames.map((skater) => {
+                                                return <li key={skater.skaterId} className="list-group-item text-center">{skater}</li>
+                                            })}</ul></p>
+                                            {JSON.stringify(selectedSkaterNames) === JSON.stringify([]) ? "" : <a href="#" onClick={(event) => {
                                                 removeSkaters(event);
                                             }} className='text-light text-decoration-none btn btn-danger mx-auto w-100'>Clear Skaters</a>}
                                         </div>
-
-                                        <div className="col-5 my-3">
-                                            {userSkaters == undefined ? "" :
-                                                <select className='form-control' name="skaters" ref={bookingSkaters} onChange={() => {
-                                                    let tmp = [];
-                                                    selectedSkaters.forEach((skater) => {
-                                                        tmp.push(skater);
-                                                    })
-                                                    if (!selectedSkaters.includes(bookingSkaters.current.value) && bookingSkaters.current.value != "Select Skater...") {
-                                                        tmp.push(bookingSkaters.current.value)
-                                                        setSelectedSkaters(tmp)
-                                                    }
-                                                }}>
+                                        <div className="col-10 my-3">
+                                            {userSkaters == undefined ?
+                                                <input type="text" className='form-control' disabled placeholder="No skaters on Your profile " />
+                                                :
+                                                <select className='form-control' name="skaters" ref={bookingSkaters} onChange={(e) => handleSkaterSelect(e)}>
                                                     <option>Select Skater...</option>
-                                                    {userSkaters.split(", ").map((skater) => { { return <option value={skater} key={userSkaters.split(", ").indexOf(skater)} className={selectedSkaters.includes(skater) ? "d-none" : "d-block"} >{skater}</option> } })}
+                                                    {userSkaters.skaters.map((skater) => {
+                                                        {
+                                                            if (selectedSkaterNames.length === 0) {
+                                                                return <option value={skater.skaterName + " " + skater.skaterLastName} key={skater.skaterId} className={selectedSkaterNames.includes(skater) ? "d-none" : "d-block"}>{skater.skaterName + " " + skater.skaterLastName}
+                                                                </option>
+                                                            } else {
+                                                                for (let i = 0; i < selectedSkaterNames.length; i++) {
+
+                                                                    return <option value={skater.skaterName + " " + skater.skaterLastName} key={skater.skaterId} className={selectedSkaterNames.includes(skater) ? "d-none" : "d-block"}>{skater.skaterName + " " + skater.skaterLastName}
+                                                                    </option>
+
+
+                                                                }
+                                                            }
+
+                                                        }
+                                                    })}
                                                 </select>
                                             }
                                         </div>
-                                        <div className="col-5 my-3">
-                                            <input type="date" className='form-control' name="bookingDate" ref={bookingDate} />
+                                        {selectedSkaterNames.length * lesson.lessonPrice === 0 ? '' : <div className="col-5 my-3 h3 text-main">Total Cost: ${selectedSkaterNames.length * lesson.lessonPrice}</div>
+                                        }
+                                        <div className="col-8 justify-content-around my-3 row">
+                                            <button className="btn custom-btn col-5">Book</button>
+                                            <Link className="btn btn-secondary custom-btn-no-colour col-5" to={'/coachesAndLessons'}>Cancel</Link>
                                         </div>
-                                        <div className="col-5 my-3">Total Cost: ${selectedSkaters.length * lesson[0].lessonPrice}</div>
-                                        <div className="col-8 d-flex flex-column justify-content-center my-3">
-                                            <button className="btn custom-btn ">Book</button>
-                                        </div>
+                                        {/* TEMPORARY */}
+                                        <div className='lead'>At the moment we aren't taking payments online, but they are coming soon!</div>
 
                                     </form>)}
                             </div>

@@ -5,6 +5,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
+const authorisation = require("./public/javascripts/authorisation")
+const nodemailer = require('nodemailer');
 
 // Create routes
 const coachesRouter = require('./routes/coaches');
@@ -13,6 +15,7 @@ const updatesRouter = require('./routes/updates');
 const usersRouter = require('./routes/users');
 const reviewsRouter = require('./routes/reviews');
 const bookingRouter = require('./routes/booking');
+const skatersRouter = require('./routes/skaters');
 
 // Logging
 logger.token('req', (req, res) => JSON.stringify(req.headers))
@@ -24,6 +27,7 @@ logger.token('res', (req, res) => {
 
 // Init express app
 const app = express();
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -37,7 +41,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors());
 
 // Link Knex
 const options = require('./knex.js');
@@ -52,9 +55,10 @@ app.use((req, res, next) => {
 app.use('/coaches', coachesRouter);
 app.use('/lessons', lessonsRouter);
 app.use('/updates', updatesRouter);
-app.use('/users', usersRouter);
-app.use('/reviews', reviewsRouter);
-app.use('/booking', bookingRouter);
+app.use('/skaters', authorisation, skatersRouter);
+app.use('/users', authorisation, usersRouter);
+app.use('/reviews', authorisation, reviewsRouter);
+app.use('/booking', authorisation, bookingRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
