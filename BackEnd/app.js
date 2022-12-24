@@ -14,7 +14,7 @@ const lessonsRouter = require('./routes/lessons');
 const updatesRouter = require('./routes/updates');
 const usersRouter = require('./routes/users');
 const reviewsRouter = require('./routes/reviews');
-const bookingRouter = require('./routes/booking');
+const bookingsRouter = require('./routes/bookings');
 const skatersRouter = require('./routes/skaters');
 
 // Logging
@@ -58,7 +58,7 @@ app.use('/updates', updatesRouter);
 app.use('/skaters', authorisation, skatersRouter);
 app.use('/users', authorisation, usersRouter);
 app.use('/reviews', authorisation, reviewsRouter);
-app.use('/booking', authorisation, bookingRouter);
+app.use('/bookings', authorisation, bookingsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

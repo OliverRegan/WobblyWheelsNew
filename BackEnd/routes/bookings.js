@@ -8,8 +8,8 @@ router.get('/', function (req, res, next) {
 
 
     // Query database
-    const queryUsers = req.db.from('users').select('*')
-    const users = []
+    const queryBookings = req.db.from('bookings').select('*')
+    const bookings = []
 
     // Throw error if there is a query in the URL
     if (Object.keys(req.query).length !== 0) {
@@ -17,13 +17,13 @@ router.get('/', function (req, res, next) {
     }
 
     // Put names into array
-    queryNames.then((user) => {
+    queryBookings.then((booking) => {
         // Map into array
-        user.map((userObj) => {
-            users.push(userObj)
+        booking.map((bookingObj) => {
+            bookings.push(bookingObj)
         })
     }).then(() => {
-        return res.status(200).json(users)
+        return res.status(200).json(bookings)
     })
 });
 

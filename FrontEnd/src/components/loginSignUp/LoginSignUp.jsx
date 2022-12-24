@@ -12,6 +12,8 @@ async function signUp(data) {
     // Make body of request
     let body = {
         "username": data.username,
+        "firstName": data.firstName,
+        "lastName": data.lastName,
         "contact": data.contact,
         "email": data.email,
         "password": data.password
@@ -106,6 +108,8 @@ const LoginSignUp = props => {
     const [searchParams] = useSearchParams();
     // Set input states
     const [userName, setUserName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [contact, setContact] = useState(0);
     const [email, setEmail] = useState('');
     const [resetCode, setResetCode] = useState(0);
@@ -162,6 +166,18 @@ const LoginSignUp = props => {
             setMsgGood(false);
         }
 
+        // Check first name
+        if (firstName === '' && props.type === 'signUp') {
+            errors.error = true;
+            errors.messages.push("A first name is required");
+            setMsgGood(false);
+        }
+        // Check last name
+        if (lastName === '' && props.type === 'signUp') {
+            errors.error = true;
+            errors.messages.push("A last name is required");
+            setMsgGood(false);
+        }
         // Check contact
         if (contact === 0 && props.type === 'signUp') {
             errors.error = true;
@@ -206,6 +222,8 @@ const LoginSignUp = props => {
             // Send request to the sign up and back end
             let data = {
                 "username": userName,
+                "firstName": firstName,
+                "lastName": lastName,
                 "contact": contact,
                 "email": email,
                 "password": password
@@ -213,6 +231,8 @@ const LoginSignUp = props => {
             signUp(data).then(data => {
                 setResponse(data);
                 console.log(data);
+                setMessage('');
+
             });
         } else if (props.type === 'login') {
             // Login and let backend deal with validation
@@ -351,6 +371,18 @@ const LoginSignUp = props => {
 
                                     </div>
 
+                                    <div className={"row w-75 mx-auto my-2 " + (props.type === ('signUp' || 'login') ? '' : 'd-none')}>
+                                        <label htmlFor="contact" className="col-md-3">FirstName:</label>
+                                        <input type="text" name="firstName" className="form-control col" onChange={(e) => { setFirstName(e.target.value) }} />
+                                        <label className="col-md-3"></label>
+
+                                    </div>
+                                    <div className={"row w-75 mx-auto my-2 " + (props.type === ('signUp' || 'login') ? '' : 'd-none')}>
+                                        <label htmlFor="contact" className="col-md-3">LastName:</label>
+                                        <input type="text" name="lastName" className="form-control col" onChange={(e) => { setLastName(e.target.value) }} />
+                                        <label className="col-md-3"></label>
+
+                                    </div>
                                     <div className={"row w-75 mx-auto my-2 " + (props.type === ('signUp' || 'login') ? '' : 'd-none')}>
                                         <label htmlFor="contact" className="col-md-3">Contact Number:</label>
                                         <input type="number" name="contact" className="form-control col" onChange={(e) => { setContact(e.target.value) }} />

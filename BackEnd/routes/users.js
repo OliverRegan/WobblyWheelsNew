@@ -9,7 +9,7 @@ var nodemailer = require('nodemailer')
 router.get('/', function (req, res, next) {
 
   // Query database
-  const queryUsers = req.db.from('users').select()
+  const queryUsers = req.db.from('users').select('*')
   const users = []
 
   // Throw error if there is a query in the URL
@@ -18,7 +18,7 @@ router.get('/', function (req, res, next) {
   }
 
   // Put names into array
-  queryNames.then((user) => {
+  queryUsers.then((user) => {
     // Map into array
     user.map((userObj) => {
       users.push(userObj)
@@ -33,7 +33,7 @@ router.get('/', function (req, res, next) {
 router.post('/signup', function (req, res, next) {
 
   // Test request params
-  if (!req.body.username || !req.body.contact || !req.body.email || !req.body.password) {
+  if (!req.body.username || !req.body.firstName || !req.body.lastName || !req.body.contact || !req.body.email || !req.body.password) {
     return res.status(400).json({
       "error": true,
       "message": "Request body incomplete, username, contact, email and password are required"
@@ -42,6 +42,8 @@ router.post('/signup', function (req, res, next) {
 
   // Otherwise assign variables from request body
   const username = req.body.username;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
   const email = req.body.email;
   const contact = req.body.contact;
 
@@ -51,7 +53,7 @@ router.post('/signup', function (req, res, next) {
 
   // prep db query for users and to insert user
   const queryUsers = req.db.from('users').select('*').where("userName", "=", username)
-  const insertUser = req.db.insert({ 'userName': username, 'userContact': contact, "userEmail": email, "userPassword": hash }).into('users')
+  const insertUser = req.db.insert({ 'userName': username, 'userFirstName': firstName, 'userLastName': lastName, 'userContact': contact, "userEmail": email, "userPassword": hash }).into('users')
 
   // Throw error if there is a query in the URL
   // if (Object.keys(req.query).length !== 0) {
